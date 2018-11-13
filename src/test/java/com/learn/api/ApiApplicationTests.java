@@ -1,7 +1,7 @@
 package com.learn.api;
 
-import com.learn.api.models.Pets;
-import com.learn.api.repositories.PetsRepository;
+import com.learn.api.models.Person;
+import com.learn.api.repositories.PersonRepository;
 import com.mongodb.MongoCommandException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,26 +15,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApiApplicationTests {
 
 	@Autowired
-	private PetsRepository repository;
+	private PersonRepository repository;
 
 	@Test
 	public void contextLoads() {
 	}
 
 
-
-	@Test
-	@Transactional
-	public void whenCountDuringMongoTransaction_thenException() {
-
-		try{
-		repository.save(new Pets(null, "test111", "test", "test"));
-		repository.save(new Pets(null, "test", "test", "test"));
-		repository.count();
-		}catch(Exception ex){
-			System.out.println(ex.getMessage());
-		}
-	}
+//
+//	@Test
+//	@Transactional
+//	public void whenCountDuringMongoTransaction_thenException() {
+//
+//		try{
+//		repository.save(new Pets(null, "test111", "test", "test"));
+//		repository.save(new Pets(null, "test", "test", "test"));
+//		repository.count();
+//		}catch(Exception ex){
+//			System.out.println(ex.getMessage());
+//		}
+//	}
 
 
 }
