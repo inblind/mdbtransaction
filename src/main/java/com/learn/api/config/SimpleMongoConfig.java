@@ -24,7 +24,7 @@ public class SimpleMongoConfig {
     }
 
     @Bean
-    public MongoTemplate mongoTemplate() throws Exception {
+    public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongo(), database);
     }
 }

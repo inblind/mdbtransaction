@@ -63,14 +63,14 @@ public class PersonController {
     }
 
     @RequestMapping(value = "/transaction", method = RequestMethod.POST)
-    public Person createPersonTransaction(@Valid @RequestBody Person Person) throws Exception {
+    public Person createPersonTransaction(@Valid @RequestBody Person Person) {
         Person.setId(ObjectId.get());
         transactionalRepo.savePersonTransaction(Person, client);
         return Person;
     }
 
     @RequestMapping(value = "/mongoTemplate", method = RequestMethod.POST)
-    public Person createPersonMongoTemplate(@Valid @RequestBody Person Person) throws Exception {
+    public Person createPersonMongoTemplate(@Valid @RequestBody Person Person) {
         //Person.setId(ObjectId.get());
         transactionalRepo.savePersonMongoTemplate(Person, client, mongoTemplate);
         return Person;

@@ -43,6 +43,7 @@ public class PersonTransactionalRepository {
 
         mongoTemplate.insert(p);
         mongoTemplate.insert(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
+        Integer.parseInt(p.getLastName());
         mongoTemplate.insert(new Person("thirdPerson", "lastName", null));
     }
 
