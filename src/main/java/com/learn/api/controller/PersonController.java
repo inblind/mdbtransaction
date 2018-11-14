@@ -2,7 +2,6 @@ package com.learn.api.controller;
 
 
 import com.learn.api.repositories.PersonRepository;
-import com.learn.api.repositories.PersonTransactionalRepository;
 import com.mongodb.MongoClient;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,18 +23,6 @@ public class PersonController {
     @Autowired
     private PersonRepository repository;
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
-
-    @Autowired
-    private MongoClient client;
-
-    private PersonTransactionalRepository transactionalRepo;
-
-    public PersonController() {
-        this.transactionalRepo = new PersonTransactionalRepository();
-    }
-
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public List<Person> getAllPerson() {
         return repository.findAll();
@@ -47,35 +34,42 @@ public class PersonController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public void modifypersonById(@PathVariable("id") ObjectId id, @Valid @RequestBody Person Person) {
-        Person.setId(id);
-        repository.save(Person);
+    public void modifypersonById(@PathVariable("id") ObjectId id, @Valid @RequestBody Person person) {
+        person.setId(id);
+        repository.save(person);
     }
 
 
     //======= POC Starts ========
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
-    public Person createPerson(@Valid @RequestBody Person Person) {
+    public Person createPerson(@Valid @RequestBody Person person) {
 
-        transactionalRepo.savePerson(Person, repository);
-        return Person;
+        repository.save(person);
+        return person;
     }
 
     @RequestMapping(value = "/transaction", method = RequestMethod.POST)
-    public Person createPersonTransaction(@Valid @RequestBody Person Person) {
-        Person.setId(ObjectId.get());
-        transactionalRepo.savePersonTransaction(Person, client);
-        return Person;
+    public Person createPersonTransaction(@Valid @RequestBody Person person) {
+        person.setId(ObjectId.get());
+        repository.savePersonTransaction(person);
+        return person;
     }
 
     @RequestMapping(value = "/mongoTemplate", method = RequestMethod.POST)
-    public Person createPersonMongoTemplate(@Valid @RequestBody Person Person) {
+    public Person createPersonMongoTemplate(@Valid @RequestBody Person person) {
         //Person.setId(ObjectId.get());
-        transactionalRepo.savePersonMongoTemplate(Person, client, mongoTemplate);
-        return Person;
+        repository.savePersonMongoTemplate(person);
+        return person;
     }
 
+
+    @RequestMapping(value = "/error", method = RequestMethod.POST)
+    public Person createPersonError(@Valid @RequestBody Person person) {
+        //Person.setId(ObjectId.get());
+        repository.savePersonError(person);
+        return person;
+    }
     //======= POC Ends ========
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)

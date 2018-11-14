@@ -7,14 +7,22 @@ import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.ClientSession;
 import org.bson.Document;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-public class PersonTransactionalRepository {
+@Repository
+public class PersonRepositoryImpl implements PersonRepositoryCustom {
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private MongoClient client;
 
     @Transactional
-    public void savePersonTransaction(Person p, MongoClient client){
+    public void savePersonTransaction(Person p){
 
         MongoDatabase database = client.getDatabase("POC_DB_4O");
 
@@ -39,7 +47,7 @@ public class PersonTransactionalRepository {
     }
 
     @Transactional
-    public void savePersonMongoTemplate(Person p, MongoClient client, MongoTemplate mongoTemplate){
+    public void savePersonMongoTemplate(Person p){
 
         mongoTemplate.insert(p);
         mongoTemplate.insert(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
@@ -48,7 +56,7 @@ public class PersonTransactionalRepository {
     }
 
     @Transactional
-    public void savePersonError(Person p, MongoClient client){
+    public void savePersonError(Person p){
 
         MongoDatabase database = client.getDatabase("POC_DB_4O");
 
@@ -80,11 +88,6 @@ public class PersonTransactionalRepository {
         doc.put("address",pet.getAddress());
 
         return doc;
-    }
-
-    @Transactional
-    public void savePerson(Person person, PersonRepository repository) {
-        repository.save(person);
     }
 
     private void testError() throws Exception {

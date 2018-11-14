@@ -23,7 +23,7 @@ public class Person {
 
 
     public String getId() {
-        return _id.toString();
+        return _id.toHexString();
     }
 
     public void setId(ObjectId _id) {
