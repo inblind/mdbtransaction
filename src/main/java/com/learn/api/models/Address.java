@@ -21,8 +21,9 @@ public class Address {
         this.zipCode = zipCode;
     }
 
-    public String getId() {
-        return _id.toString();
+    @Id
+    public String get_id() {
+        return _id == null ? null : _id.toHexString();
     }
 
     public void setId(ObjectId _id) {

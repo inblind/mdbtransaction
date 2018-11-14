@@ -3,8 +3,13 @@ package com.learn.api.models;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-public class Person {
+@Document(collection="person")
+@TypeAlias("person")
+public class Person{
     @Id
     public ObjectId _id;
 
@@ -22,9 +27,11 @@ public class Person {
     }
 
 
-    public String getId() {
-        return _id.toHexString();
+    @Id
+    public String get_id() {
+        return _id == null ? null : _id.toHexString();
     }
+
 
     public void setId(ObjectId _id) {
         this._id = _id;

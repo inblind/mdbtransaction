@@ -30,7 +30,7 @@ public class PersonController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public Person getpersonById(@PathVariable("id") ObjectId id) {
-        return repository.findBy_id(id);
+        return repository.findById(id);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
@@ -49,31 +49,38 @@ public class PersonController {
         return person;
     }
 
-    @RequestMapping(value = "/transaction", method = RequestMethod.POST)
+    @RequestMapping(value = "/transactional", method = RequestMethod.POST)
     public Person createPersonTransaction(@Valid @RequestBody Person person) {
         person.setId(ObjectId.get());
-        repository.savePersonTransaction(person);
+        repository.savePersonTransactional(person);
         return person;
     }
 
-    @RequestMapping(value = "/mongoTemplate", method = RequestMethod.POST)
+    @RequestMapping(value = "/mongoTemplateTransactional", method = RequestMethod.POST)
     public Person createPersonMongoTemplate(@Valid @RequestBody Person person) {
         //Person.setId(ObjectId.get());
-        repository.savePersonMongoTemplate(person);
+        repository.savePersonMongoTemplateTransactional(person);
+        return person;
+    }
+
+    @RequestMapping(value = "/mongoTemplateWithSessionTransactional", method = RequestMethod.POST)
+    public Person createPersonMongoTemplateWithSession(@Valid @RequestBody Person person) {
+        //Person.setId(ObjectId.get());
+        repository.savePersonMongoTemplateWithSessionTransactional(person);
         return person;
     }
 
 
-    @RequestMapping(value = "/error", method = RequestMethod.POST)
+    @RequestMapping(value = "/repositoryTransactional", method = RequestMethod.POST)
     public Person createPersonError(@Valid @RequestBody Person person) {
         //Person.setId(ObjectId.get());
-        repository.savePersonError(person);
+        repository.savePersonRepositoryTransactional(person, repository);
         return person;
     }
     //======= POC Ends ========
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteperson(@PathVariable ObjectId id) {
-        repository.delete(repository.findBy_id(id));
+        repository.delete(repository.findById(id));
     }
 }

@@ -2,12 +2,16 @@ package com.learn.api.repositories;
 
 import com.learn.api.models.Person;
 import com.learn.api.models.Address;
+import com.mongodb.ClientSessionOptions;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.ClientSession;
+import com.sun.org.apache.xml.internal.resolver.readers.ExtendedXMLCatalogReader;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.SessionSynchronization;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,33 +25,36 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
     @Autowired
     private MongoClient client;
 
+    //method to insert into databse with ClientSession and databse.getCollection.insert (old fashion way)
     @Transactional
-    public void savePersonTransaction(Person p){
+    public void savePersonTransactional(Person p) {
 
         MongoDatabase database = client.getDatabase("POC_DB_4O");
 
-        try(ClientSession session = client.startSession()){
+        try (ClientSession session = client.startSession()) {
 
             session.startTransaction();
 
-            database.getCollection("person").insertOne(session, pojoToDoc(p));
-            p.setFirstName("secondPerson");
-            database.getCollection("person").insertOne(session, pojoToDoc(p));
-            p.setFirstName("thirdPerson");
-            database.getCollection("person").insertOne(session, pojoToDoc(p));
+            if (p.address != null)
+                database.getCollection("address").insertOne(session, addressToDoc(p.getAddress()));
+
+            database.getCollection("person").insertOne(session, personToDoc(p, p.getAddress()._id));
 
             Integer.parseInt(p.getLastName());
 
             session.commitTransaction();
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
-            throw new MongoException("error on inserting: "+ex.getMessage());
+            throw new MongoException("error on inserting: " + ex.getMessage());
         }
     }
 
+
+    //method to insert into database with mongotemplate using transactional
+    //this is not working, transactional will not do rollback on error
     @Transactional
-    public void savePersonMongoTemplate(Person p){
+    public void savePersonMongoTemplateTransactional(Person p) {
 
         mongoTemplate.insert(p);
         mongoTemplate.insert(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
@@ -56,36 +63,62 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
     }
 
     @Transactional
-    public void savePersonError(Person p){
+    public void savePersonMongoTemplateWithSessionTransactional(Person p) {
 
-        MongoDatabase database = client.getDatabase("POC_DB_4O");
+        ClientSession session = client.startSession();
+        session.startTransaction();
+        try {
+            mongoTemplate.withSession( () -> session).
+                    execute( action -> {
 
-        try(ClientSession session = client.startSession()){
+                        action.insert(p);
+                        action.insert(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
+                        Integer.parseInt(p.getLastName());
+                        action.insert(new Person("thirdPerson", "lastName", new Address("street", "number", "61410")));
 
-            session.startTransaction();
-
-            database.getCollection("person").insertOne(session, pojoToDoc(p));
-            p.setFirstName("secondPerson");
-            database.getCollection("person").insertOne(session, pojoToDoc(p));
-            p.setFirstName("thirdPerson");
-            database.getCollection("person").insertOne(session, pojoToDoc(p));
-
-            Integer.parseInt(p.getLastName());
-
+                        return p;
+                    }
+            );
             session.commitTransaction();
-
-        }catch(Exception ex){
+        } catch (Exception ex) {
+            session.abortTransaction();
             System.out.println(ex.getMessage());
-            throw new MongoException("error on inserting: "+ex.getMessage());
+            throw new MongoException("error on inserting: " + ex.getMessage());
+        } finally {
+            session.close();
         }
+
     }
 
-    private Document pojoToDoc(Person pet){
-        Document doc = new Document();
+    //method to insert into database with repository using transactional
+    //this is not working, transactional will not do rollback on error
+    @Transactional
+    public void savePersonRepositoryTransactional(Person p, PersonRepository repository) {
 
-        doc.put("firstName",pet.getFirstName());
-        doc.put("lastName",pet.getLastName());
-        doc.put("address",pet.getAddress());
+        repository.save(p);
+        repository.save(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
+        Integer.parseInt(p.getLastName());
+        repository.save(new Person("thirdPerson", "lastName", null));
+    }
+
+    private Document personToDoc(Person p, ObjectId addressId) {
+        Document doc = new Document();
+        doc.put("_id", p._id);
+        doc.put("firstName", p.getFirstName());
+        doc.put("lastName", p.getLastName());
+        doc.put("address", addressId);
+
+        return doc;
+    }
+
+    private Document addressToDoc(Address address) {
+        Document doc = new Document();
+        if (address._id == null)
+            address.setId(ObjectId.get());
+        doc.put("_id", address._id);
+        doc.put("street", address.getStreet());
+        doc.put("number", address.getNumber());
+        doc.put("zipCode", address.getZipCode());
 
         return doc;
     }
