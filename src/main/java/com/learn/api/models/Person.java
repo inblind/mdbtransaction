@@ -5,7 +5,8 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 @Document(collection="person")
 @TypeAlias("person")
@@ -15,15 +16,16 @@ public class Person{
 
     public String firstName;
     public String lastName;
-    public Address address;
+
+    public List<Address> addresses;
 
     // Constructors
     public Person() {}
 
-    public Person(String firstName, String lastName, Address address) {
+    public Person(String firstName, String lastName, List<Address>  addresses) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.address = address;
+        this.addresses = addresses;
     }
 
 
@@ -53,11 +55,11 @@ public class Person{
         this.lastName = lastName;
     }
 
-    public Address getAddress() {
-        return address;
+    public List<Address>  getAddresses() {
+        return addresses;
     }
 
-    public void setAddress(Address address) {
-        this.address = address;
+    public void setAddress(List<Address>  address) {
+        this.addresses = addresses;
     }
 }

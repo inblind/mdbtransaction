@@ -2,7 +2,11 @@ package com.learn.api.models;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document(collection="address")
+@TypeAlias("address")
 public class Address {
 
     @Id

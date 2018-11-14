@@ -16,6 +16,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Repository
 public class PersonRepositoryImpl implements PersonRepositoryCustom {
 
@@ -35,10 +38,13 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
 
             session.startTransaction();
 
-            if (p.address != null)
-                database.getCollection("address").insertOne(session, addressToDoc(p.getAddress()));
+            if (p.addresses != null){
+                for(Address address : p.getAddresses()){
+                    database.getCollection("address").insertOne(session, addressToDoc(address));
+                }
+            }
 
-            database.getCollection("person").insertOne(session, personToDoc(p, p.getAddress()._id));
+            database.getCollection("person").insertOne(session, personToDoc(p, null));
 
             Integer.parseInt(p.getLastName());
 
@@ -56,8 +62,13 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
     @Transactional
     public void savePersonMongoTemplateTransactional(Person p) {
 
+        List<Address> addresses = new ArrayList<>();
+        addresses.add(new Address("street", "number", "61410"));
+        addresses.add(new Address("street2", "number2", "61410"));
+        addresses.add(new Address("street3", "number3", "61410"));
+
         mongoTemplate.insert(p);
-        mongoTemplate.insert(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
+        mongoTemplate.insert(new Person("secondPerson", "lastName", addresses));
         Integer.parseInt(p.getLastName());
         mongoTemplate.insert(new Person("thirdPerson", "lastName", null));
     }
@@ -72,9 +83,6 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
                     execute( action -> {
 
                         action.insert(p);
-                        action.insert(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
-                        Integer.parseInt(p.getLastName());
-                        action.insert(new Person("thirdPerson", "lastName", new Address("street", "number", "61410")));
 
                         return p;
                     }
@@ -87,7 +95,6 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
         } finally {
             session.close();
         }
-
     }
 
     //method to insert into database with repository using transactional
@@ -95,8 +102,14 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
     @Transactional
     public void savePersonRepositoryTransactional(Person p, PersonRepository repository) {
 
+
+        List<Address> addresses = new ArrayList<>();
+        addresses.add(new Address("street", "number", "61410"));
+        addresses.add(new Address("street2", "number2", "61410"));
+        addresses.add(new Address("street3", "number3", "61410"));
+
         repository.save(p);
-        repository.save(new Person("secondPerson", "lastName", new Address("street", "number", "61410")));
+        repository.save(new Person("secondPerson", "lastName", addresses));
         Integer.parseInt(p.getLastName());
         repository.save(new Person("thirdPerson", "lastName", null));
     }
