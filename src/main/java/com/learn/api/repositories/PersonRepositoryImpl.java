@@ -79,11 +79,26 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
         ClientSession session = client.startSession();
         session.startTransaction();
         try {
-            mongoTemplate.withSession( () -> session).
-                    execute( action -> {
+            mongoTemplate.withSession( () -> session)
+                    .execute( action -> {
+
+                        for(Address a : p.getAddresses()){
+                            action.insert(a);
+                            Integer.parseInt(a.getNumber());
+                        }
+
+                        List<Address> tmpAddresses =  p.getAddresses();
+                        p.addresses = new ArrayList<>();
+
+                        for(Address adress : tmpAddresses){
+                            Address a = new Address();
+                            a.setId(adress._id);
+                            p.addresses.add(a);
+                        }
 
                         action.insert(p);
 
+                        p.addresses = tmpAddresses;
                         return p;
                     }
             );
